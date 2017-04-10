@@ -41,6 +41,13 @@ public class TodoResource {
     }
 
     @GET
+    @Timed
+    @Path("/list/{listId}")
+    public List<Todo> getTodosByListId(@PathParam("listId") UUID listId) {
+        return todoRepository.getByListId(listId);
+    }
+
+    @GET
     @Path("/{id}")
     @Timed
     public Optional<Todo> getTodo(@PathParam("id") UUID id) {

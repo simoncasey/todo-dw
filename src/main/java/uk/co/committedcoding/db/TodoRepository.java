@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 
 /**
  * Created by Simon Casey on 10/04/2017.
@@ -73,6 +74,12 @@ public class TodoRepository {
 
     public Optional<Todo> get(UUID id) {
         return Optional.ofNullable(map.get(id));
+    }
+
+    public List<Todo> getByListId(UUID listId) {
+        return map.values().stream()
+                .filter( t -> t.getListId().equals(listId))
+                .collect(Collectors.toList());
     }
 
     static class TodoSerializer implements Serializable, Serializer<Todo> {
