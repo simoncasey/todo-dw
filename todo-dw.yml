@@ -1,3 +1,5 @@
+dbFilePath: ./dbFile.dat
+
 server:
 #  softNofileLimit: 1000
 #  hardNofileLimit: 1000

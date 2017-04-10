@@ -3,8 +3,13 @@ package uk.co.committedcoding.resources;
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.NotImplementedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.co.committedcoding.api.Todo;
+import uk.co.committedcoding.db.TodoRepository;
 
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -19,13 +24,21 @@ import java.util.UUID;
 @Produces(MediaType.APPLICATION_JSON)
 public class TodoResource {
 
+    final Logger logger = LoggerFactory.getLogger(TodoResource.class);
+
+    private TodoRepository todoRepository;
+
+    @Inject
+    public TodoResource(TodoRepository todoRepository) {
+        logger.info("Creating a new TodoResource!");
+        this.todoRepository = todoRepository;
+    }
+
     @GET
     @Timed
     public List<Todo> getTodos() {
-        Todo test1 = new Todo("test 1", "a test description for 1");
-        Todo test2 = new Todo("test 2");
-        Todo test3 = new Todo("test 3");
-        return Lists.newArrayList(test1, test2, test3);
+
+        return todoRepository.getAll();
     }
 
     @GET

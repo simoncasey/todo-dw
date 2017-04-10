@@ -5,6 +5,7 @@ import lombok.Data;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.util.UUID;
 
 /**
@@ -12,7 +13,7 @@ import java.util.UUID;
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Todo {
+public class Todo implements Serializable {
 
     @NotNull
     private UUID id = UUID.randomUUID();
@@ -25,6 +26,8 @@ public class Todo {
     private Integer priority = 1;
     @NotNull
     private Status status = Status.INCOMPLETE;
+
+    private Todo() {}
 
     public Todo(String summary) {
         this.summary = summary;
