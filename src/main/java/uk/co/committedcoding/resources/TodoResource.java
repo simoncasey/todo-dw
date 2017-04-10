@@ -1,18 +1,15 @@
 package uk.co.committedcoding.resources;
 
 import com.codahale.metrics.annotation.Timed;
-import com.google.common.collect.Lists;
-import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.co.committedcoding.api.Todo;
 import uk.co.committedcoding.db.TodoRepository;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -23,6 +20,9 @@ import java.util.UUID;
 @Path("/todo")
 @Produces(MediaType.APPLICATION_JSON)
 public class TodoResource {
+
+    @Context
+    private UriInfo uriInfo;
 
     final Logger logger = LoggerFactory.getLogger(TodoResource.class);
 
@@ -37,7 +37,6 @@ public class TodoResource {
     @GET
     @Timed
     public List<Todo> getTodos() {
-
         return todoRepository.getAll();
     }
 
@@ -45,27 +44,48 @@ public class TodoResource {
     @Path("/{id}")
     @Timed
     public Optional<Todo> getTodo(@PathParam("id") UUID id) {
-        return Optional.empty();
+        return todoRepository.get(id);
     }
 
     @POST
     @Timed
-    public Todo createTodo(Todo todo) {
-        throw new NotImplementedException("No implemented");
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response createTodo(NewTodo todo) {
+        Todo createdTodo = todoRepository.put(todo.build());
+        UriBuilder ub = uriInfo.getAbsolutePathBuilder();
+        URI todoUri = ub.
+                path(createdTodo.getId().toString()).
+                build();
+
+        return Response.created(todoUri)
+                .entity(createdTodo)
+                .build();
     }
 
     @PUT
     @Path("/{id}")
     @Timed
+    @Consumes(MediaType.APPLICATION_JSON)
     public Todo updateTodo(@PathParam("id") UUID id, Todo todo) {
-        throw new NotImplementedException("No implemented");
+        if (!todo.getId().equals(id)) {
+            throw new BadRequestException("Todo Id does not match supplied Id");
+        } else {
+            if (todoRepository.get(id).isPresent()) {
+                return todoRepository.put(todo);
+            }
+            throw new NotFoundException();
+        }
     }
 
     @DELETE
     @Path("/{id}")
     @Timed
     public Response deleteTodo(@PathParam("id") UUID id) {
-        throw new NotImplementedException("No implemented");
+        if (todoRepository.get(id).isPresent()) {
+            todoRepository.delete(id);
+            return Response.noContent().build();
+        }
+        throw new NotFoundException();
     }
 
 

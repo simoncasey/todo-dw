@@ -1,9 +1,9 @@
 package uk.co.committedcoding.api;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Builder;
 import lombok.Data;
 
-import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.UUID;
@@ -12,40 +12,22 @@ import java.util.UUID;
  * Created by Simon Casey on 07/04/2017.
  */
 @Data
+@Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Todo implements Serializable {
 
     @NotNull
-    private UUID id = UUID.randomUUID();
+    private UUID id;
     @NotNull
-    private UUID listId = UUID.randomUUID();
+    private UUID listId;
     @NotNull
     private String summary;
     private String description;
     @NotNull
+    @Builder.Default
     private Integer priority = 1;
     @NotNull
+    @Builder.Default
     private Status status = Status.INCOMPLETE;
 
-    private Todo() {}
-
-    public Todo(String summary) {
-        this.summary = summary;
-    }
-
-    public Todo(String summary, String description) {
-        this.summary = summary;
-        this.description = description;
-    }
-
-    public Todo(UUID listId, String summary) {
-        this.listId = listId;
-        this.summary = summary;
-    }
-
-    public Todo(UUID listId, String summary, String description) {
-        this.listId = listId;
-        this.summary = summary;
-        this.description = description;
-    }
 }

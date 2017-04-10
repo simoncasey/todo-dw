@@ -41,13 +41,13 @@ public class TodoRepository {
                 .keySerializer(Serializer.UUID)
                 .valueSerializer(new TodoSerializer())
                 .createOrOpen();
-        Todo test1 = new Todo("test 1", "a test description for 1");
-        Todo test2 = new Todo("test 2");
-        Todo test3 = new Todo("test 3");
-
-        put(test1);
-        put(test2);
-        put(test3);
+//        Todo test1 = new Todo("test 1", "a test description for 1");
+//        Todo test2 = new Todo("test 2");
+//        Todo test3 = new Todo("test 3");
+//
+//        put(test1);
+//        put(test2);
+//        put(test3);
     }
 
 
