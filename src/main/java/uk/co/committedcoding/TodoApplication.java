@@ -3,6 +3,7 @@ package uk.co.committedcoding;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import uk.co.committedcoding.resources.ListResource;
 import uk.co.committedcoding.resources.TodoResource;
 
 /**
@@ -25,8 +26,10 @@ public class TodoApplication extends Application<TodoApplicationConfiguration> {
     @Override
     public void run(TodoApplicationConfiguration configuration,
                     Environment environment) {
-        // register resource now
-        final TodoResource resource = new TodoResource();
-        environment.jersey().register(resource);
+        // register resources
+        final TodoResource todoResource = new TodoResource();
+        environment.jersey().register(todoResource);
+        final ListResource listResource = new ListResource();
+        environment.jersey().register(listResource);
     }
 }
