@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.co.committedcoding.api.Todo;
 import uk.co.committedcoding.db.TodoRepository;
+import uk.co.committedcoding.views.HomeView;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -13,6 +14,7 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -41,6 +43,12 @@ public class TodoResource {
     @Timed
     public List<Todo> getTodos() {
         return todoRepository.getAll();
+    }
+
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public HomeView getHomeView() {
+        return new HomeView(todoRepository.getAll());
     }
 
     @GET
