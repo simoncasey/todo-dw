@@ -1,11 +1,9 @@
 package uk.co.committedcoding;
 
-import com.hubspot.dropwizard.guice.GuiceBundle;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import org.mapdb.DB;
-import org.mapdb.DBMaker;
+import ru.vyarus.dropwizard.guice.GuiceBundle;
 
 import java.io.File;
 
@@ -15,7 +13,7 @@ import java.io.File;
 
 public class TodoApplication extends Application<TodoApplicationConfiguration> {
 
-    private GuiceBundle<TodoApplicationConfiguration> guiceBundle;
+//    private GuiceBundle<TodoApplicationConfiguration> guiceBundle;
 
     public static void main(String[] args) throws Exception {
         new TodoApplication().run(args);
@@ -24,14 +22,17 @@ public class TodoApplication extends Application<TodoApplicationConfiguration> {
 
     @Override
     public void initialize(Bootstrap<TodoApplicationConfiguration> bootstrap) {
-
-        guiceBundle = GuiceBundle.<TodoApplicationConfiguration>newBuilder()
-                .addModule(new TodoModule())
+        bootstrap.addBundle(GuiceBundle.builder()
                 .enableAutoConfig(getClass().getPackage().getName())
-                .setConfigClass(TodoApplicationConfiguration.class)
-                .build();
-
-        bootstrap.addBundle(guiceBundle);
+                .modules(new TodoModule())
+                .build());
+//        guiceBundle = GuiceBundle.<TodoApplicationConfiguration>newBuilder()
+//                .addModule(new TodoModule())
+//                .enableAutoConfig(getClass().getPackage().getName())
+//                .setConfigClass(TodoApplicationConfiguration.class)
+//                .build();
+//
+//        bootstrap.addBundle(guiceBundle);
     }
 
     @Override

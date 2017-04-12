@@ -15,7 +15,7 @@ import java.util.UUID;
 @Data
 public class NewTodo {
 
-    private Optional<UUID> listId;
+    private UUID listId;
     @NotNull
     private String summary;
     private String description;
@@ -27,12 +27,18 @@ public class NewTodo {
         this.description = description;
     }
 
+    public NewTodo(UUID listId, String summary, String description) {
+        this.listId = listId;
+        this.summary = summary;
+        this.description = description;
+    }
+
     public Todo build() {
         return Todo.builder()
                 .id(UUID.randomUUID())
                 .summary(summary)
                 .description(description)
-                .listId(listId.orElse(UUID.randomUUID()))
+                .listId(Optional.ofNullable(listId).orElse(UUID.randomUUID()))
                 .priority(1)
                 .status(Status.INCOMPLETE)
                 .build();

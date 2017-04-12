@@ -17,7 +17,8 @@ import java.util.UUID;
 public class Todo implements Serializable {
 
     @NotNull
-    private UUID id;
+    @Builder.Default
+    private UUID id = UUID.randomUUID();
     @NotNull
     private UUID listId;
     @NotNull

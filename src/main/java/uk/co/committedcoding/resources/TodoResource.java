@@ -7,6 +7,9 @@ import uk.co.committedcoding.api.Todo;
 import uk.co.committedcoding.db.TodoRepository;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.net.URI;
@@ -21,8 +24,8 @@ import java.util.UUID;
 @Produces(MediaType.APPLICATION_JSON)
 public class TodoResource {
 
-    @Context
-    private UriInfo uriInfo;
+    @Inject
+    private Provider<UriInfo> uriInfo;
 
     final Logger logger = LoggerFactory.getLogger(TodoResource.class);
 
@@ -57,9 +60,9 @@ public class TodoResource {
     @POST
     @Timed
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response createTodo(NewTodo todo) {
+    public Response createTodo(@NotNull @Valid NewTodo todo) {
         Todo createdTodo = todoRepository.put(todo.build());
-        UriBuilder ub = uriInfo.getAbsolutePathBuilder();
+        UriBuilder ub = uriInfo.get().getAbsolutePathBuilder();
         URI todoUri = ub.
                 path(createdTodo.getId().toString()).
                 build();
