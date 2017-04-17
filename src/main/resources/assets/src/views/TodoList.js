@@ -6,6 +6,19 @@ var radio = require("radio")
 var Todo = require("../models/Todo")
 var Dialog = require("./Dialog")
 
+const STATUS_DELETED = "Deleted";
+const STATUS_INCOMPLETE = "Incomplete";
+const STATUS_COMPLETE = "Complete";
+
+var isComplete = function (todo) {
+  return todo.status === STATUS_COMPLETE
+}
+
+var markChecked = function (todo, fn) {
+  if (fn(todo)) return "[checked='checked']"
+  return ""
+}
+
 var TodoList = {
   oninit: Todo.loadList,
   toModalContent: function (todo) {
@@ -42,29 +55,33 @@ var TodoList = {
     }
   },
   view: function () {
-    return m("#todo-list", Todo.list.map(function (todo) {
+    return m("#todo-list.list-group", Todo.list.map(function (todo) {
       return m("a.list-group-item.list-group-item-action.flex-column.align-items-start[href='#']",
-        [
           m(".d-flex.w-100.justify-content-between",
             [
-              m("h5.mb-1",{
+              m("h5.mb-1", {
                 onclick: function() {
                   radio('dialog-open').broadcast(TodoList.toModalContent(todo))
                 }
               },
                 todo.summary
               ),
-              m("small.text-muted",
-                todo.status
+              m(".form-check",
+                m(".form-check-label", [
+                  m("small.text-muted[style='margin-right:30px;']", todo.status),
+                  m("input.form-check-input[type='checkbox'][id='status-checkbox']" + markChecked(todo, isComplete), {
+                    onclick: m.withAttr("checked", function(selected) {
+                      todo.status = selected ? STATUS_COMPLETE : STATUS_INCOMPLETE
+                      Todo.update(todo).then(function(result) {
+                        todo = result
+                      })
+                    })
+                  })
+                ])
               )
             ]
-          ),
-          m("p.mb-1",
-            todo.description
           )
-        ]
-      )
-    }))
+    )}))
   }
 }
 

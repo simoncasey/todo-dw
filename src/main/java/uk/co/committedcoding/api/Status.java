@@ -10,8 +10,7 @@ import lombok.Getter;
 public enum Status {
     DELETED("Deleted", -1),
     INCOMPLETE("Incomplete", 0),
-    DUE("Due", 0),
-    COMPLETE("Complete", 0);
+    COMPLETE("Complete", 1);
 
     private final String name;
     private final int value;

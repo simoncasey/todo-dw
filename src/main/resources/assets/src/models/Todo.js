@@ -41,7 +41,7 @@ var Todo = {
       url: "http://localhost:8080/api/todo/" + todo.id,
       data: todo,
     })
-  }
+  },
 }
 
 module.exports = Todo
