@@ -59,11 +59,11 @@ var TodoList = {
       return m("a.list-group-item.list-group-item-action.flex-column.align-items-start[href='#']",
           m(".d-flex.w-100.justify-content-between",
             [
-              m("h5.mb-1", {
-                onclick: function() {
-                  radio('dialog-open').broadcast(TodoList.toModalContent(todo))
-                }
-              },
+              m("h5.mb-1.w-100", {
+                  onclick: function() {
+                    radio('dialog-open').broadcast(TodoList.toModalContent(todo))
+                  }
+                },
                 todo.summary
               ),
               m(".form-check",
