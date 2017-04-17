@@ -1,13 +1,12 @@
 package uk.co.committedcoding;
 
+import com.github.dirkraft.dropwizard.fileassets.FileAssetsBundle;
 import io.dropwizard.Application;
+import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
-
-import java.io.File;
-import java.util.Map;
 
 /**
  * Created by Simon Casey on 07/04/2017.
@@ -26,6 +25,8 @@ public class TodoApplication extends Application<TodoApplicationConfiguration> {
                 .modules(new TodoModule())
                 .build());
         bootstrap.addBundle(new ViewBundle<>());
+//        bootstrap.addBundle(new AssetsBundle("/assets/", "/", "index.html"));
+        bootstrap.addBundle(new FileAssetsBundle("src/main/resources/assets", "/", "index.html"));
     }
 
     @Override

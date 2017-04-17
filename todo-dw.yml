@@ -1,6 +1,7 @@
 dbFilePath: ./dbFile.dat
 
 server:
+  rootPath: /api/
 #  softNofileLimit: 1000
 #  hardNofileLimit: 1000
   applicationConnectors:

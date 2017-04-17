@@ -18,3 +18,5 @@ buildNumber.properties
 !/.mvn/wrapper/maven-wrapper.jar
 
 /dbFile.dat
+/src/main/resources/assets/node_modules/
+/src/main/resources/assets/bin/
