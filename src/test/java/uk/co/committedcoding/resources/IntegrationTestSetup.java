@@ -55,7 +55,7 @@ public abstract class IntegrationTestSetup<T extends Configuration> {
                 .setScheme("http")
                 .setHost("localhost")
                 .setPort(getRule().getLocalPort())
-                .setPath(path)
+                .setPath("/api" + path)
                 .build();
     }
 

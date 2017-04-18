@@ -1,6 +1,7 @@
 package uk.co.committedcoding.resources;
 
 import io.dropwizard.testing.ResourceHelpers;
+import io.dropwizard.testing.junit.DAOTestRule;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
@@ -11,17 +12,15 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.json.simple.JSONObject;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.vyarus.dropwizard.guice.test.GuiceyAppRule;
 import uk.co.committedcoding.TodoApplication;
 import uk.co.committedcoding.TodoApplicationConfiguration;
 import uk.co.committedcoding.api.Status;
 import uk.co.committedcoding.api.Todo;
+
+import java.net.URI;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,7 +33,7 @@ public class TodoResourceTest extends IntegrationTestSetup<TodoApplicationConfig
 
     @ClassRule
     public static final DropwizardAppRule<TodoApplicationConfiguration> RULE =
-            new DropwizardAppRule<TodoApplicationConfiguration>(TodoApplication.class, ResourceHelpers.resourceFilePath("test-todo-dw.yml"));
+            new DropwizardAppRule<>(TodoApplication.class, ResourceHelpers.resourceFilePath("test-todo-dw.yml"));
 
     DropwizardAppRule<TodoApplicationConfiguration> getRule() {
         return RULE;
@@ -57,7 +56,7 @@ public class TodoResourceTest extends IntegrationTestSetup<TodoApplicationConfig
 
         final Long todoId = todoRepository.create(todo1).getId();
 
-        HttpGet get = new HttpGet(local("/todo/" + todoId.toString()));
+        HttpGet get = new HttpGet(local("/todo/" + todoId));
 
         HttpResponse response = httpClient.execute(get);
 

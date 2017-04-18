@@ -1,6 +1,7 @@
 package uk.co.committedcoding.db;
 
 import io.dropwizard.hibernate.AbstractDAO;
+import io.dropwizard.hibernate.UnitOfWork;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,18 +27,22 @@ public class TodoRepository extends AbstractDAO<Todo> {
         super(factory);
     }
 
+    @UnitOfWork
     public List<Todo> getAll() {
         return list(namedQuery("uk.co.committedcoding.api.Todo.findAll"));
     }
 
+    @UnitOfWork
     public Optional<Todo> getById(Long id) {
         return Optional.ofNullable(get(id));
     }
 
+    @UnitOfWork
     public Todo create(@Valid Todo todo) {
         return persist(todo);
     }
 
+    @UnitOfWork
     public Optional<Todo> update(@Valid Todo todo) {
         return getById(todo.getId()).map( existing -> {
             existing.setPriority(todo.getPriority());
@@ -48,6 +53,7 @@ public class TodoRepository extends AbstractDAO<Todo> {
         });
     }
 
+    @UnitOfWork
     public void delete(Long id) {
         delete(id);
     }
