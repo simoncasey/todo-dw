@@ -19,4 +19,4 @@ buildNumber.properties
 
 /dbFile.dat
 /src/main/resources/assets/node_modules/
-/src/main/resources/assets/bin/
+#/src/main/resources/assets/bin/

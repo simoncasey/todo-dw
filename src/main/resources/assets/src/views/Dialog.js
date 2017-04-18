@@ -5,12 +5,9 @@ var m = require("mithril")
 var radio = require("radio")
 
 var noopContentProvider = {
-    header: function () {
-  },
-  body: function () {
-},
-footer: function () {
-}
+  header: function () {},
+  body: function () {},
+  footer: function () {}
 }
 
 var Dialog = {
@@ -31,7 +28,6 @@ var Dialog = {
     return Math.max(doc.clientHeight, window.innerHeight || 0)
   },
   oninit: function (vnode) {
-
     radio('dialog-open').subscribe(Dialog.onopen)
     radio('dialog-close').subscribe(Dialog.onclose)
   },
@@ -40,6 +36,7 @@ var Dialog = {
     let smallClose = m('span',
       {onclick: Dialog.onclose},
       m.trust('&times;'))
+
 
     let header = m('.modal-header', [
       m('h5.modal-title', Dialog.dialogContentProvider.header()),
