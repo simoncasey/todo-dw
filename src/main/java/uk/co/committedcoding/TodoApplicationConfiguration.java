@@ -2,7 +2,9 @@ package uk.co.committedcoding;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
+import io.dropwizard.db.DataSourceFactory;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -10,16 +12,12 @@ import javax.validation.constraints.NotNull;
  */
 public class TodoApplicationConfiguration extends Configuration {
 
+    @Valid
     @NotNull
-    private String dbFilePath;
-
     @JsonProperty
-    public String getDbFilePath() {
-        return dbFilePath;
-    }
+    private DataSourceFactory database = new DataSourceFactory();
 
-    @JsonProperty
-    public void setDbFilePath(String dbFilePath) {
-        this.dbFilePath = dbFilePath;
+    public DataSourceFactory getDataSourceFactory() {
+        return database;
     }
 }

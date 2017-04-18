@@ -1,6 +1,7 @@
 package uk.co.committedcoding.resources;
 
 import com.codahale.metrics.annotation.Timed;
+import io.dropwizard.hibernate.UnitOfWork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.co.committedcoding.api.Todo;
@@ -12,12 +13,13 @@ import javax.inject.Provider;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriInfo;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Created by Simon Casey on 07/04/2017.
@@ -28,48 +30,40 @@ public class TodoResource {
 
     @Inject
     private Provider<UriInfo> uriInfo;
+    @Inject
+    private TodoRepository todoRepository;
 
     final Logger logger = LoggerFactory.getLogger(TodoResource.class);
 
-    private TodoRepository todoRepository;
-
-    @Inject
-    public TodoResource(TodoRepository todoRepository) {
-        logger.info("Creating a new TodoResource!");
-        this.todoRepository = todoRepository;
-    }
-
     @GET
     @Timed
+    @UnitOfWork
     public List<Todo> getTodos() {
         return todoRepository.getAll();
     }
 
     @GET
+    @Timed
     @Produces(MediaType.TEXT_HTML)
+    @UnitOfWork
     public HomeView getHomeView() {
         return new HomeView(todoRepository.getAll());
     }
 
     @GET
-    @Timed
-    @Path("/list/{listId}")
-    public List<Todo> getTodosByListId(@PathParam("listId") UUID listId) {
-        return todoRepository.getByListId(listId);
-    }
-
-    @GET
     @Path("/{id}")
     @Timed
-    public Optional<Todo> getTodo(@PathParam("id") UUID id) {
-        return todoRepository.get(id);
+    @UnitOfWork
+    public Optional<Todo> getTodo(@PathParam("id") Long id) {
+        return todoRepository.getById(id);
     }
 
     @POST
     @Timed
     @Consumes(MediaType.APPLICATION_JSON)
+    @UnitOfWork
     public Response createTodo(@NotNull @Valid NewTodo todo) {
-        Todo createdTodo = todoRepository.put(todo.build());
+        Todo createdTodo = todoRepository.create(todo.build());
         UriBuilder ub = uriInfo.get().getAbsolutePathBuilder();
         URI todoUri = ub.
                 path(createdTodo.getId().toString()).
@@ -84,26 +78,22 @@ public class TodoResource {
     @Path("/{id}")
     @Timed
     @Consumes(MediaType.APPLICATION_JSON)
-    public Todo updateTodo(@PathParam("id") UUID id, Todo todo) {
+    @UnitOfWork
+    public Todo updateTodo(@PathParam("id") Long id, Todo todo) {
         if (!todo.getId().equals(id)) {
             throw new BadRequestException("Todo Id does not match supplied Id");
         } else {
-            if (todoRepository.get(id).isPresent()) {
-                return todoRepository.put(todo);
-            }
-            throw new NotFoundException();
+            return todoRepository.update(todo).orElseThrow(NotFoundException::new);
         }
     }
 
     @DELETE
     @Path("/{id}")
     @Timed
-    public Response deleteTodo(@PathParam("id") UUID id) {
-        if (todoRepository.get(id).isPresent()) {
-            todoRepository.delete(id);
-            return Response.noContent().build();
-        }
-        throw new NotFoundException();
+    @UnitOfWork
+    public Response deleteTodo(@PathParam("id") Long id) {
+        todoRepository.delete(id);
+        return Response.noContent().build();
     }
 
 

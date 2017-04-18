@@ -1,101 +1,55 @@
 package uk.co.committedcoding.db;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.mapdb.DB;
-import org.mapdb.DBMaker;
-import org.mapdb.Serializer;
-import org.mapdb.DataOutput2;
-import org.mapdb.DataInput2;
+import io.dropwizard.hibernate.AbstractDAO;
+import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.vyarus.dropwizard.guice.module.installer.feature.eager.EagerSingleton;
 import uk.co.committedcoding.api.Todo;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
-import javax.validation.constraints.NotNull;
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentMap;
-import java.util.stream.Collectors;
 
 /**
  * Created by Simon Casey on 10/04/2017.
  */
-@Singleton
-public class TodoRepository {
+@EagerSingleton
+public class TodoRepository extends AbstractDAO<Todo> {
 
     static final Logger logger = LoggerFactory.getLogger(TodoRepository.class);
 
-    private DB db;
-    private ConcurrentMap<UUID, Todo> map;
-
     @Inject
-    public TodoRepository(Database database) {
-        this.db = database.getDb();
-        this.map = db.hashMap("todos")
-                .keySerializer(Serializer.UUID)
-                .valueSerializer(new TodoSerializer())
-                .createOrOpen();
-    }
-
-
-    public Todo put(Todo todo) {
-        map.put(todo.getId(), todo);
-        db.commit();
-        return todo;
+    public TodoRepository(final SessionFactory factory) {
+        super(factory);
     }
 
     public List<Todo> getAll() {
-        return new ArrayList<>(map.values());
+        return list(namedQuery("uk.co.committedcoding.api.Todo.findAll"));
     }
 
-    public void delete(Todo todo) {
-        delete(todo.getId());
-        db.commit();
+    public Optional<Todo> getById(Long id) {
+        return Optional.ofNullable(get(id));
     }
 
-    public void delete(UUID id) {
-        map.remove(id);
-        db.commit();
+    public Todo create(@Valid Todo todo) {
+        return persist(todo);
     }
 
-    public void drop() {
-        map.clear();
-        db.commit();
+    public Optional<Todo> update(@Valid Todo todo) {
+        return getById(todo.getId()).map( existing -> {
+            existing.setPriority(todo.getPriority());
+            existing.setDescription(todo.getDescription());
+            existing.setStatus(todo.getStatus());
+            existing.setSummary(todo.getSummary());
+            return existing;
+        });
     }
 
-    public Optional<Todo> get(UUID id) {
-        return Optional.ofNullable(map.get(id));
-    }
-
-    public List<Todo> getByListId(UUID listId) {
-        return map.values().stream()
-                .filter( t -> t.getListId().equals(listId))
-                .collect(Collectors.toList());
-    }
-
-    static class TodoSerializer implements Serializable, Serializer<Todo> {
-
-        @Override
-        public void serialize(@NotNull DataOutput2 out, @NotNull Todo value) throws IOException {
-            if (value == null) {
-                logger.error("Todo serializer called with 'null'");
-            } else {
-                out.writeUTF(new ObjectMapper().writeValueAsString(value));
-            }
-        }
-
-        @Override
-        public Todo deserialize(DataInput2 in, int available) throws IOException {
-            String s = in.readUTF();
-            return new ObjectMapper().readValue(s, Todo.class);
-        }
+    public void delete(Long id) {
+        delete(id);
     }
 
 }

@@ -17,17 +17,11 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.vyarus.dropwizard.guice.test.GuiceyAppRule;
 import uk.co.committedcoding.TodoApplication;
 import uk.co.committedcoding.TodoApplicationConfiguration;
 import uk.co.committedcoding.api.Status;
 import uk.co.committedcoding.api.Todo;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -48,30 +42,20 @@ public class TodoResourceTest extends IntegrationTestSetup<TodoApplicationConfig
 
     @Before
     public void beforeEach() {
-        todoRepository.drop();
     }
 
     @AfterClass
     public static void tearDown() {
-        try {
-            Files.deleteIfExists(Paths.get(RULE.getConfiguration().getDbFilePath()));
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
     }
 
     @Test
     public void getValidTodo() throws Exception {
-        UUID todoId = UUID.randomUUID();
-        UUID listId = UUID.randomUUID();
 
         Todo todo1 = Todo.builder()
-                .id(todoId)
                 .summary("some summary")
-                .listId(listId)
                 .build();
 
-        todoRepository.put(todo1);
+        final Long todoId = todoRepository.create(todo1).getId();
 
         HttpGet get = new HttpGet(local("/todo/" + todoId.toString()));
 
@@ -82,7 +66,6 @@ public class TodoResourceTest extends IntegrationTestSetup<TodoApplicationConfig
         Todo result = readContent(response, Todo.class);
 
         assertThat(result.getId()).isEqualTo(todoId);
-        assertThat(result.getListId()).isEqualTo(listId);
         assertThat(result.getSummary()).isEqualTo("some summary");
     }
 
@@ -92,9 +75,9 @@ public class TodoResourceTest extends IntegrationTestSetup<TodoApplicationConfig
                 .summary("some summary")
                 .build();
 
-        todoRepository.put(todo1);
+        todoRepository.create(todo1);
 
-        HttpGet get = new HttpGet(local("/todo/" + UUID.randomUUID().toString()));
+        HttpGet get = new HttpGet(local("/todo/" + 999));
 
         HttpResponse response = httpClient.execute(get);
 
@@ -103,14 +86,12 @@ public class TodoResourceTest extends IntegrationTestSetup<TodoApplicationConfig
 
     @Test
     public void createValidTodo() throws Exception {
-        UUID listId = UUID.randomUUID();
 
         HttpPost post = new HttpPost(local("/todo"));
 
         post.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
 
         JSONObject obj = new JSONObject();
-        obj.put("listId", listId.toString());
         obj.put("summary", "test summary");
         obj.put("description", "test description");
 
@@ -122,7 +103,6 @@ public class TodoResourceTest extends IntegrationTestSetup<TodoApplicationConfig
 
         Todo result = readContent(response, Todo.class);
 
-        assertThat(result.getListId()).isEqualTo(listId);
         assertThat(result.getSummary()).isEqualTo("test summary");
         assertThat(result.getDescription()).isEqualTo("test description");
         assertThat(response.getFirstHeader(HttpHeaders.LOCATION)).isNotNull();
@@ -130,16 +110,12 @@ public class TodoResourceTest extends IntegrationTestSetup<TodoApplicationConfig
 
     @Test
     public void updateValidTodo() throws Exception {
-        UUID todoId = UUID.randomUUID();
-        UUID listId = UUID.randomUUID();
 
         Todo todo1 = Todo.builder()
-                .id(todoId)
                 .summary("some summary")
-                .listId(listId)
                 .build();
 
-        todoRepository.put(todo1);
+        final Long todoId = todoRepository.create(todo1).getId();
 
         HttpPut put = new HttpPut(local("/todo/" + todoId.toString()));
 
@@ -147,7 +123,6 @@ public class TodoResourceTest extends IntegrationTestSetup<TodoApplicationConfig
 
         JSONObject obj = new JSONObject();
         obj.put("id", todoId.toString());
-        obj.put("listId", listId.toString());
         obj.put("summary", "updated summary");
         obj.put("description", "updated description");
         obj.put("priority", 10);
@@ -161,7 +136,6 @@ public class TodoResourceTest extends IntegrationTestSetup<TodoApplicationConfig
 
         Todo result = readContent(response, Todo.class);
 
-        assertThat(result.getListId()).isEqualTo(listId);
         assertThat(result.getSummary()).isEqualTo("updated summary");
         assertThat(result.getDescription()).isEqualTo("updated description");
         assertThat(result.getPriority()).isEqualTo(10);
@@ -170,15 +144,12 @@ public class TodoResourceTest extends IntegrationTestSetup<TodoApplicationConfig
 
     @Test
     public void createInvalidTodo() throws Exception {
-        UUID listId = UUID.randomUUID();
-
         HttpPost post = new HttpPost(local("/todo"));
 
         post.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
 
         // missing summary
         JSONObject obj = new JSONObject();
-        obj.put("listId", listId.toString());
         obj.put("description", "test description");
 
         post.setEntity(new StringEntity(obj.toJSONString()));
@@ -186,77 +157,6 @@ public class TodoResourceTest extends IntegrationTestSetup<TodoApplicationConfig
         HttpResponse response = httpClient.execute(post);
 
         assertThat(status(response)).isEqualTo(HttpStatus.SC_UNPROCESSABLE_ENTITY);
-    }
-
-    @Test
-    public void getValidListTodos() throws Exception {
-        UUID listId = UUID.randomUUID();
-
-        Todo todo1 = Todo.builder()
-                .summary("some summary 1")
-                .listId(listId)
-                .build();
-
-        Todo todo2 = Todo.builder()
-                .summary("some summary 2")
-                .listId(listId)
-                .build();
-
-        Todo todo3 = Todo.builder()
-                .summary("some summary 3")
-                .listId(listId)
-                .build();
-
-        todoRepository.put(todo1);
-        todoRepository.put(todo2);
-        todoRepository.put(todo3);
-
-        HttpGet get = new HttpGet(local("/todo/list/" + listId.toString()));
-
-        HttpResponse response = httpClient.execute(get);
-
-        assertThat(status(response)).isEqualTo(HttpStatus.SC_OK);
-
-        List<Todo> results = Arrays.asList(readContent(response, Todo[].class));
-
-        assertThat(results.size()).isEqualTo(3);
-        assertThat(results.stream().anyMatch(todo -> todo.equals(todo1))).isTrue();
-        assertThat(results.stream().anyMatch(todo -> todo.equals(todo2))).isTrue();
-        assertThat(results.stream().anyMatch(todo -> todo.equals(todo3))).isTrue();
-    }
-
-    @Test
-    public void getEmptyListTodos() throws Exception {
-        UUID listId = UUID.randomUUID();
-
-        Todo todo1 = Todo.builder()
-                .summary("some summary 1")
-                .listId(listId)
-                .build();
-
-        Todo todo2 = Todo.builder()
-                .summary("some summary 2")
-                .listId(listId)
-                .build();
-
-        Todo todo3 = Todo.builder()
-                .summary("some summary 3")
-                .listId(listId)
-                .build();
-
-        todoRepository.put(todo1);
-        todoRepository.put(todo2);
-        todoRepository.put(todo3);
-
-        HttpGet get = new HttpGet(local("/todo/list/" + UUID.randomUUID().toString()));
-
-        HttpResponse response = httpClient.execute(get);
-
-        assertThat(status(response)).isEqualTo(HttpStatus.SC_OK);
-
-        List<Todo> results = Arrays.asList(readContent(response, Todo[].class));
-
-        assertThat(results.isEmpty()).isTrue();
     }
 
 }

@@ -1,5 +1,3 @@
-dbFilePath: ./dbFile.dat
-
 server:
   rootPath: /api/
 #  softNofileLimit: 1000
@@ -23,3 +21,13 @@ server:
 #      port: 8444
 #      keyStorePath: example.keystore
 #      keyStorePassword: example
+database:
+  driverClass: org.h2.Driver
+  user: sa
+  password:
+  url: jdbc:h2:mem:sample
+
+  properties:
+    charSet: UTF-8
+    hibernate.dialect: org.hibernate.dialect.H2Dialect
+    hibernate.hbm2ddl.auto: create
