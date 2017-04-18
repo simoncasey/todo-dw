@@ -5,7 +5,6 @@ import io.dropwizard.hibernate.UnitOfWork;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.vyarus.dropwizard.guice.module.installer.feature.eager.EagerSingleton;
 import uk.co.committedcoding.api.Todo;
 
 import javax.inject.Inject;

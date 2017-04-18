@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.co.committedcoding.api.Todo;
 import uk.co.committedcoding.db.TodoRepository;
-import uk.co.committedcoding.views.HomeView;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -40,14 +39,6 @@ public class TodoResource {
     @UnitOfWork
     public List<Todo> getTodos() {
         return todoRepository.getAll();
-    }
-
-    @GET
-    @Timed
-    @Produces(MediaType.TEXT_HTML)
-    @UnitOfWork
-    public HomeView getHomeView() {
-        return new HomeView(todoRepository.getAll());
     }
 
     @GET

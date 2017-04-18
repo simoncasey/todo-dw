@@ -8,7 +8,6 @@ import lombok.Getter;
  */
 @Getter
 public enum Status {
-    DELETED("Deleted", -1),
     INCOMPLETE("Incomplete", 0),
     COMPLETE("Complete", 1);
 
