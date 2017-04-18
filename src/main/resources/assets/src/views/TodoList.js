@@ -55,10 +55,29 @@ var TodoList = {
     }
   },
   view: function () {
-    return m("#todo-list.list-group", Todo.list.map(function (todo) {
+
+    return m("#todo-list.list-group", Todo.list.sort((a, b) => b.priority - a.priority).map(function (todo) {
       return m("a.list-group-item.list-group-item-action.flex-column.align-items-start[href='#']",
           m(".d-flex.w-100.justify-content-between",
             [
+              m("i.fi-arrow-up[style='padding-right: 10px']", {
+                onclick: function (e) {
+                  e.preventDefault()
+                  todo.priority++
+                  Todo.update(todo).then(function() {
+                    Todo.loadList();
+                  })
+                }
+              }, ""),
+              m("i.fi-arrow-down[style='padding-right: 10px']", {
+                onclick: function (e) {
+                  e.preventDefault()
+                  todo.priority--
+                  Todo.update(todo).then(function() {
+                    Todo.loadList();
+                  })
+                }
+              }, ""),
               m("h5.mb-1.w-100", {
                   onclick: function() {
                     radio('dialog-open').broadcast(TodoList.toModalContent(todo))

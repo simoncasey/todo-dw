@@ -12,8 +12,8 @@ var NewTodoForm = {
         e.preventDefault()
         Todo.create(NewTodoForm.current)
           .then(function(result) {
-            Todo.loadList()
             NewTodoForm.current = {}
+            Todo.loadList()
           })
       }
     }, [

@@ -20,8 +20,6 @@ import uk.co.committedcoding.TodoApplicationConfiguration;
 import uk.co.committedcoding.api.Status;
 import uk.co.committedcoding.api.Todo;
 
-import java.net.URI;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -41,6 +39,7 @@ public class TodoResourceTest extends IntegrationTestSetup<TodoApplicationConfig
 
     @Before
     public void beforeEach() {
+        todoRepository.drop();
     }
 
     @AfterClass
@@ -124,7 +123,7 @@ public class TodoResourceTest extends IntegrationTestSetup<TodoApplicationConfig
         obj.put("id", todoId.toString());
         obj.put("summary", "updated summary");
         obj.put("description", "updated description");
-        obj.put("priority", 10);
+        obj.put("priority", 0);
         obj.put("status", Status.COMPLETE.getName());
 
         put.setEntity(new StringEntity(obj.toJSONString()));
@@ -137,7 +136,53 @@ public class TodoResourceTest extends IntegrationTestSetup<TodoApplicationConfig
 
         assertThat(result.getSummary()).isEqualTo("updated summary");
         assertThat(result.getDescription()).isEqualTo("updated description");
-        assertThat(result.getPriority()).isEqualTo(10);
+        assertThat(result.getPriority()).isEqualTo(0);
+        assertThat(result.getStatus()).isEqualTo(Status.COMPLETE);
+    }
+
+    @Test
+    public void updatePriority() throws Exception {
+
+        Todo todo1 = Todo.builder()
+                .summary("i was first")
+                .build();
+        Todo todo2 = Todo.builder()
+                .summary("i was second")
+                .build();
+        Todo todo3 = Todo.builder()
+                .summary("i was third")
+                .build();
+
+        final Long todoId = todoRepository.create(todo1).getId();
+        todoRepository.create(todo2);
+        todoRepository.create(todo3);
+
+        HttpGet get = new HttpGet(local("/todo/" + todoId.toString()));
+        HttpResponse getResponse = httpClient.execute(get);
+        Todo getResult = readContent(getResponse, Todo.class);
+        assertThat(getResult.getPriority()).isEqualTo(0);
+
+        HttpPut put = new HttpPut(local("/todo/" + todoId.toString()));
+        put.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
+
+        JSONObject obj = new JSONObject();
+        obj.put("id", todoId.toString());
+        obj.put("summary", "now i am second");
+        obj.put("description", "updated description");
+        obj.put("priority", 1);
+        obj.put("status", Status.COMPLETE.getName());
+
+        put.setEntity(new StringEntity(obj.toJSONString()));
+
+        HttpResponse response = httpClient.execute(put);
+
+        assertThat(status(response)).isEqualTo(HttpStatus.SC_OK);
+
+        Todo result = readContent(response, Todo.class);
+
+        assertThat(result.getSummary()).isEqualTo("now i am second");
+        assertThat(result.getDescription()).isEqualTo("updated description");
+        assertThat(result.getPriority()).isEqualTo(1);
         assertThat(result.getStatus()).isEqualTo(Status.COMPLETE);
     }
 

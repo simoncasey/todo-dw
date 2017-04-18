@@ -24,7 +24,7 @@ import java.util.UUID;
 @NamedQueries({
     @NamedQuery(
         name = "uk.co.committedcoding.api.Todo.findAll",
-        query = "from Todo"
+        query = "FROM Todo t ORDER BY t.priority DESC"
     )
 })
 public class Todo implements Serializable {
