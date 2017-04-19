@@ -26,10 +26,11 @@ The frontend for the application requires node/npm to build.
 A compiled app.js is included in this repo so you shouldn't need to do anything.
 
 ## Usage
-The input box will create a new Todo with the summary you type in.
+The input box will create a new Todo with the summary you type in. 
 The list of Todos is sorted with most important at the top to least important at the bottom.
 When created, a Todo is added to the top of the list (most important). 
 Use the up/down arrows on left to change the priority of a Todo and move it within the list.
+
 Toggling the checkbox on the right will change the Complete/Incomplete status of the Todo.
 Clicking on the summary of a Todo will open a modal to allow you to edit the summary and add an optional description to the Todo.
 The app currently uses an in-memory DB which will drop all data when the app is closed.
@@ -47,6 +48,7 @@ Run `npm start` from there to start watching .js files for changes.
 ### Guice via dropwizard-guicey - <https://github.com/xvik/dropwizard-guicey>
 ### Hibernate via dropwizard-hibernate - <http://www.dropwizard.io/1.1.0/docs/manual/hibernate.html>
 ### Mithril.js - <https://mithril.js.org/>
+### Bootstrap v4 alpha - <https://v4-alpha.getbootstrap.com/>
 
 ## Ideas for improvements:
 - Refactor some of the code that deals with maintaining the priority of Todos out into a service and this logic separately.
