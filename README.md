@@ -51,7 +51,7 @@ Run `npm start` from there to start watching .js files for changes.
 ### Bootstrap v4 alpha - <https://v4-alpha.getbootstrap.com/>
 
 ## Ideas for improvements:
-- Refactor some of the code that deals with maintaining the priority of Todos out into a service and this logic separately.
+- Refactor some of the code that deals with maintaining the priority of Todos out into a service and test this logic separately.
 - Add support for multiple lists of Todos.
 - Bring in config profiles to start the app different in tests/dev/prod (assets bundle/location for example)
 - Implement a js test framework for the frontend.
