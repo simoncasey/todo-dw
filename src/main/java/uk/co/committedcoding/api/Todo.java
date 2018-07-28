@@ -1,6 +1,7 @@
 package uk.co.committedcoding.api;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import javaslang.control.Option;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,7 +27,7 @@ import java.io.Serializable;
         query = "FROM Todo t ORDER BY t.priority DESC"
     )
 })
-public class Todo implements Serializable {
+public class Todo implements Serializable, Comparable<Todo>{
 
     @Id
     @GeneratedValue
@@ -41,4 +42,8 @@ public class Todo implements Serializable {
     @Builder.Default
     private Status status = Status.INCOMPLETE;
 
+    @Override
+    public int compareTo(Todo o) {
+        return this.priority.compareTo(o.priority);
+    }
 }

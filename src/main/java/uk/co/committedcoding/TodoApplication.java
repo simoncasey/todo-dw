@@ -4,6 +4,7 @@ import com.github.dirkraft.dropwizard.fileassets.FileAssetsBundle;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import javaslang.jackson.datatype.JavaslangModule;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
 
 /**
@@ -26,6 +27,7 @@ public class TodoApplication extends Application<TodoApplicationConfiguration> {
                 .build());
 //        bootstrap.addBundle(new AssetsBundle("/assets/", "/", "index.html"));
         bootstrap.addBundle(new FileAssetsBundle("src/main/resources/assets", "/", "index.html"));
+        bootstrap.getObjectMapper().registerModule(new JavaslangModule());
     }
 
     @Override

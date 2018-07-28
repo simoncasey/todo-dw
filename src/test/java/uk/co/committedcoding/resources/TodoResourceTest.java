@@ -53,7 +53,7 @@ public class TodoResourceTest extends IntegrationTestSetup<TodoApplicationConfig
                 .summary("some summary")
                 .build();
 
-        final Long todoId = todoRepository.create(todo1).getId();
+        final Long todoId = todoRepository.save(todo1).getId();
 
         HttpGet get = new HttpGet(local("/todo/" + todoId));
 
@@ -69,12 +69,6 @@ public class TodoResourceTest extends IntegrationTestSetup<TodoApplicationConfig
 
     @Test
     public void getInvalidTodo() throws Exception {
-        Todo todo1 = Todo.builder()
-                .summary("some summary")
-                .build();
-
-        todoRepository.create(todo1);
-
         HttpGet get = new HttpGet(local("/todo/" + 999));
 
         HttpResponse response = httpClient.execute(get);
@@ -113,7 +107,7 @@ public class TodoResourceTest extends IntegrationTestSetup<TodoApplicationConfig
                 .summary("some summary")
                 .build();
 
-        final Long todoId = todoRepository.create(todo1).getId();
+        final Long todoId = todoRepository.save(todo1).getId();
 
         HttpPut put = new HttpPut(local("/todo/" + todoId.toString()));
 
@@ -144,18 +138,21 @@ public class TodoResourceTest extends IntegrationTestSetup<TodoApplicationConfig
     public void updatePriority() throws Exception {
 
         Todo todo1 = Todo.builder()
+                .priority(0)
                 .summary("i was first")
                 .build();
         Todo todo2 = Todo.builder()
+                .priority(1)
                 .summary("i was second")
                 .build();
         Todo todo3 = Todo.builder()
+                .priority(2)
                 .summary("i was third")
                 .build();
 
-        final Long todoId = todoRepository.create(todo1).getId();
-        todoRepository.create(todo2);
-        todoRepository.create(todo3);
+        final Long todoId = todoRepository.save(todo1).getId();
+        todoRepository.save(todo2);
+        todoRepository.save(todo3);
 
         HttpGet get = new HttpGet(local("/todo/" + todoId.toString()));
         HttpResponse getResponse = httpClient.execute(get);

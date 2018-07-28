@@ -2,6 +2,7 @@ package uk.co.committedcoding.db;
 
 import io.dropwizard.hibernate.AbstractDAO;
 import io.dropwizard.hibernate.UnitOfWork;
+import javaslang.control.Option;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +13,6 @@ import javax.inject.Singleton;
 import javax.validation.Valid;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.IntStream;
 
 /**
@@ -28,64 +28,24 @@ public class TodoRepository extends AbstractDAO<Todo> {
         super(factory);
     }
 
-    private List<Todo> getAllOrdered() {
-        return list(namedQuery("uk.co.committedcoding.api.Todo.findAll"));
-    }
-
     @UnitOfWork
     public List<Todo> getAll() {
-        return getAllOrdered();
+        return list(query("FROM Todo t"));
     }
 
     @UnitOfWork
-    public Optional<Todo> getById(Long id) {
-        return Optional.ofNullable(get(id));
+    public Option<Todo> getById(Long id) {
+        return Option.of(get(id));
     }
 
     @UnitOfWork
-    public Todo create(@Valid Todo todo) {
-        final int priority = getAllOrdered().size(); // zero-based priority so no offset required
-        todo.setPriority(priority);
+    public Todo save(@Valid Todo todo) {
         return persist(todo);
     }
 
     @UnitOfWork
-    public Optional<Todo> update(@Valid Todo updatedTodo) {
-        return Optional.ofNullable(get(updatedTodo.getId())).map(existingTodo -> {
-            List<Todo> existingList = getAllOrdered();
-            Collections.reverse(existingList);
-
-            int existingListSize = existingList.size();
-
-            if (updatedTodo.getPriority() < 0) {
-                updatedTodo.setPriority(0);
-            }
-            if (updatedTodo.getPriority() >= existingListSize) {
-                updatedTodo.setPriority(existingListSize-1);
-            }
-
-            // remove the existing entry in the list
-            existingList.removeIf(todo -> todo.getId().equals(existingTodo.getId()));
-
-            existingTodo.setPriority(updatedTodo.getPriority());
-            existingTodo.setDescription(updatedTodo.getDescription());
-            existingTodo.setStatus(updatedTodo.getStatus());
-            existingTodo.setSummary(updatedTodo.getSummary());
-            existingList.add(updatedTodo.getPriority(), existingTodo);
-
-            IntStream.range(0, existingListSize)
-                    .forEach(idx -> {
-                        Long id = existingList.get(idx).getId();
-                        get(id).setPriority(idx);
-                    });
-
-            return existingTodo;
-        });
-    }
-
-    @UnitOfWork
-    public void delete(Long id) {
-        getById(id).ifPresent(todo -> currentSession().delete(todo));
+    public void delete(Todo todo) {
+        currentSession().delete(todo);
     }
 
     @UnitOfWork

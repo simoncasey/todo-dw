@@ -2,10 +2,12 @@ package uk.co.committedcoding.resources;
 
 import com.codahale.metrics.annotation.Timed;
 import io.dropwizard.hibernate.UnitOfWork;
+import javaslang.control.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.co.committedcoding.api.Todo;
 import uk.co.committedcoding.db.TodoRepository;
+import uk.co.committedcoding.service.TodoService;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -18,7 +20,6 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Created by Simon Casey on 07/04/2017.
@@ -31,6 +32,8 @@ public class TodoResource {
     private Provider<UriInfo> uriInfo;
     @Inject
     private TodoRepository todoRepository;
+    @Inject
+    private TodoService todoService;
 
     final Logger logger = LoggerFactory.getLogger(TodoResource.class);
 
@@ -45,8 +48,8 @@ public class TodoResource {
     @Path("/{id}")
     @Timed
     @UnitOfWork
-    public Optional<Todo> getTodo(@PathParam("id") Long id) {
-        return todoRepository.getById(id);
+    public Todo getTodo(@PathParam("id") Long id) {
+        return todoRepository.getById(id).getOrElseThrow(NotFoundException::new);
     }
 
     @POST
@@ -54,7 +57,7 @@ public class TodoResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @UnitOfWork
     public Response createTodo(@NotNull @Valid NewTodo todo) {
-        Todo createdTodo = todoRepository.create(todo.build());
+        Todo createdTodo = todoService.persist(todo.build());
         UriBuilder ub = uriInfo.get().getAbsolutePathBuilder();
         URI todoUri = ub.
                 path(createdTodo.getId().toString()).
@@ -74,7 +77,7 @@ public class TodoResource {
         if (!todo.getId().equals(id)) {
             throw new BadRequestException("Todo Id does not match supplied Id");
         } else {
-            return todoRepository.update(todo).orElseThrow(NotFoundException::new);
+            return todoService.persist(todo);
         }
     }
 
@@ -83,7 +86,7 @@ public class TodoResource {
     @Timed
     @UnitOfWork
     public Response deleteTodo(@PathParam("id") Long id) {
-        todoRepository.delete(id);
+        todoService.delete(id);
         return Response.noContent().build();
     }
 
